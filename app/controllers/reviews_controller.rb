@@ -1,6 +1,5 @@
 class ReviewsController < ApplicationController
-  before_action :find_review, only: [:update]
-  skip_before_action :check_authentication, only: [:index, :show, :update]
+  skip_before_action :check_authentication, only: [:index, :show]
 
   def index
     @reviews = Review.all
@@ -8,12 +7,12 @@ class ReviewsController < ApplicationController
   end
 
   def create
-    @review = Review.new
-    @review.save
-    redirect_to review_path(@review)
+    @review = current_user.reviews.create(review_params)
+    render json: @review
   end
 
   def update
+    @review = Review.find(params[:id])
     @review.update(review_params)
     if @review.save
       render json: @review
@@ -25,6 +24,12 @@ class ReviewsController < ApplicationController
   def show
     @review = Review.find(params[:id])
     render json: @review
+  end
+
+  def destroy
+    @review = Review.find(params[:id])
+    @review.destroy
+    render json: @reviews
   end
 
   private
